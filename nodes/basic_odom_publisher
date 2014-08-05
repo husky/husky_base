@@ -69,7 +69,7 @@ class DeadReckoning(object):
 
         # Initialize odometry message
         self.odom = Odometry()
-        self.odom.header.frame_id = rospy.get_param('~odom_frame_id', "odom_combined")
+        self.odom.header.frame_id = rospy.get_param('~odom_frame_id', "odom")
         self.odom.child_frame_id = rospy.get_param('~base_frame_id', "base_footprint")
         self.last_encoder = []
 
