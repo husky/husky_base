@@ -40,6 +40,8 @@
 #include "ros/ros.h"
 #include "sensor_msgs/JointState.h"
 #include "husky_msgs/HuskyStatus.h"
+#include "husky_msgs/HuskyWheelTick.h"
+
 #include <string>
 
 namespace husky_base
@@ -54,6 +56,7 @@ namespace husky_base
     HuskyHardware(ros::NodeHandle nh, ros::NodeHandle private_nh);
 
     void updateJointsFromHardware();
+    void updateWheelTicksFromHardware();
 
     void writeCommandsToHardware();
 
@@ -86,10 +89,16 @@ namespace husky_base
     ros::Publisher diagnostic_publisher_;
     husky_msgs::HuskyStatus husky_status_msg_;
     diagnostic_updater::Updater diagnostic_updater_;
+
     HuskyHardwareDiagnosticTask<clearpath::DataSystemStatus> system_status_task_;
     HuskyHardwareDiagnosticTask<clearpath::DataPowerSystem> power_status_task_;
     HuskyHardwareDiagnosticTask<clearpath::DataSafetySystemStatus> safety_status_task_;
     HuskySoftwareDiagnosticTask software_status_task_;
+
+    //Wheel tick support
+    ros::Publisher wheel_publisher_;
+    husky_msgs::HuskyWheelTick husky_wheel_msg_;
+    void initializeWheelTicks();
 
     // ROS Parameters
     double wheel_diameter_, max_accel_, max_speed_;
