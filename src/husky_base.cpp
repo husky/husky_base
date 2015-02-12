@@ -41,6 +41,8 @@ void controlLoop(const ros::TimerEvent &event, husky_base::HuskyHardware &husky,
 {
   husky.reportLoopFrequency(event);
   husky.updateJointsFromHardware();
+  husky.updateWheelTicksFromHardware();
+
   cm.update(event.current_real, event.current_real - event.last_real);
   husky.writeCommandsToHardware();
 }

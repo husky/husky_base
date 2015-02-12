@@ -63,6 +63,7 @@ namespace husky_base
     connect(port);
     resetTravelOffset();
     initializeDiagnostics();
+    initializeWheelTicks();
     registerControlInterfaces();
   }
 
@@ -128,6 +129,10 @@ namespace husky_base
     diagnostic_publisher_ = nh_.advertise<husky_msgs::HuskyStatus>("status", 10);
   }
 
+  void HuskyHardware::initializeWheelTicks()
+  {
+        wheel_publisher_ = nh_.advertise<husky_msgs::HuskyWheelTick>("wheel_tick", 10);
+  }
 
   /**
   * Register interfaces with the RobotHW interface manager, allowing ros_control operation
@@ -160,11 +165,37 @@ namespace husky_base
     diagnostic_publisher_.publish(husky_status_msg_);
   }
 
+  /*Update the wheel ticks and publish */
+  void HuskyHardware::updateWheelTicksFromHardware()
+  {
+    Msg<clearpath::DataEncodersRaw>::Ptr enc = Msg<clearpath::DataEncodersRaw>::getUpdate();
+    
+    int index = 0;
+    if (enc)
+      {
+	husky_wheel_msg_.name.clear();
+	husky_wheel_msg_.tickCount.clear();
+
+	//ROS_INFO("Found %d encoders", enc->getCount());
+	husky_wheel_msg_.name.push_back("left");
+        husky_wheel_msg_.tickCount.push_back(enc->getTicks(index));
+
+	index++;
+	husky_wheel_msg_.name.push_back("right");
+        husky_wheel_msg_.tickCount.push_back(enc->getTicks(index));
+	
+	husky_wheel_msg_.header.stamp = ros::Time::now();
+	wheel_publisher_.publish(husky_wheel_msg_);
+      }
+  }
+
   /**
   * Pull latest speed and travel measurements from MCU, and store in joint structure for ros_control
   */
   void HuskyHardware::updateJointsFromHardware()
   {
+
+    
     Msg<clearpath::DataEncoders>::Ptr enc = Msg<clearpath::DataEncoders>::getUpdate();
     if (enc)
     {
